@@ -32,9 +32,9 @@ class Linear_NN(torch.nn.Module):
     # 180 is given from the one-hot encoding of the 20 amino acids * 9 peptide length
     def __init__(self, input_size):
         super(Linear_NN, self).__init__()
-        self.fc1 = torch.nn.Linear(input_size, input_size // 2)
-        self.fc2 = torch.nn.Linear(input_size//2, input_size // 10)
-        self.fc3 = torch.nn.Linear(input_size//10, 1)
+        self.fc1 = torch.nn.Linear(input_size, 256)
+        self.fc2 = torch.nn.Linear(256, 16)
+        self.fc3 = torch.nn.Linear(16, 1)
         self.drop = torch.nn.Dropout(p=0.5)
     
     def forward(self, x):
@@ -52,10 +52,11 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # %%
 data_dir = '../data/'
-peptides_file = data_dir + "binding_affinity.txt"
+peptides_file = data_dir + "pan_prediction.txt"
 depictions_dir = data_dir + "2Dstruc/"
 peptides_list = np.loadtxt(peptides_file, dtype=str).tolist()
-peptides_list = [row[1:] for row in peptides_list if len(row[1]) == 9]
+peptides_list = [[row[2], row[11]] for row in peptides_list]
+
 targets = []
 peptides = []
 for peptide, score in peptides_list:
@@ -197,13 +198,13 @@ def plot_PCA_variance(pca, encoding_method, cumulative=True):
         plt.xlabel('Number of Components')
         plt.ylabel('Cumulative Variance')
         plt.title('Cumulative Variance by Number of Components, Encoding Method: ' + encoding_method)
-        plt.show()
+        #plt.show()
     else:
         plt.bar(range(1, len(variance_ratio)+1), variance_ratio)
         plt.xlabel('Number of Components')
         plt.ylabel('Variance Ratio')
         plt.title('Variance Ratio by Number of Components, Encoding Method: ' + encoding_method)
-        plt.show()
+        #plt.show()
     
 
 # %% [markdown]
@@ -309,12 +310,12 @@ for encoding_method in ['onehot', 'pca', 'vgg', 'pixel', 'vgg_features']:
 
     elif encoding_method == 'pca':
         aa_feature_dict, pca = PCA_pixel_features(amino_acid_full_names)
-        plot_PCA_variance(pca, encoding_method, cumulative=True)
+        #plot_PCA_variance(pca, encoding_method, cumulative=True)
         encoded_peptides = Encoder(peptides_train, aa_feature_dict)
 
     elif encoding_method == 'vgg':
         aa_feature_dict, pca = PCA_vgg_features(amino_acid_full_names)
-        plot_PCA_variance(pca, encoding_method, cumulative=True)
+        #plot_PCA_variance(pca, encoding_method, cumulative=True)
         encoded_peptides = Encoder(peptides_train, aa_feature_dict)
 
     elif encoding_method == 'pixel':
@@ -400,7 +401,7 @@ for encoding_method in ['onehot', 'pca', 'vgg', 'pixel', 'vgg_features']:
         training_losses = []
         validation_losses = []
 
-        for epoch in range(0, 10):
+        for epoch in range(0, 100):
         
                 print(f'Epoch {epoch+1}')
 
@@ -496,14 +497,14 @@ for encoding_method in ['onehot', 'pca', 'vgg', 'pixel', 'vgg_features']:
         return averaged_predictions, total_loss
 
     # Load models
-    models = []
+    models_list = []
     for i in range(1,6):
         model = Linear_NN(input_size).to(device)
         model.load_state_dict(torch.load(f'./model/{encoding_method}_model_fold_{i}.pt'))
-        models.append(model)
+        models_list.append(model)
 
     # Test models
-    predictions, total_loss = evaluate_model(models, evaluation_peptides_dataset)
+    predictions, total_loss = evaluate_model(models_list, evaluation_peptides_dataset)
 
     print(f'Total Loss: {total_loss}')
 
