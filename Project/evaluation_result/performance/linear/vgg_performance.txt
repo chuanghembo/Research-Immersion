@@ -1,0 +1,36 @@
+--------------------------------------------------
+Cross Validation
+--------------------------------------------------
+
+accuracy
+5-Fold Cross-Validation accuracy scores: [0.956 0.958 0.96  0.962 0.955]
+Mean accuracy score: 0.958 +/- 0.003
+
+average precision score
+5-Fold Cross-Validation average precision score scores: [0.799 0.806 0.817 0.825 0.795]
+Mean average precision score score: 0.809 +/- 0.011
+
+recall score
+5-Fold Cross-Validation recall score scores: [0.884 0.87  0.879 0.884 0.847]
+Mean recall score score: 0.873 +/- 0.014
+
+f1 score
+5-Fold Cross-Validation f1 score scores: [0.882 0.884 0.892 0.896 0.875]
+Mean f1 score score: 0.886 +/- 0.007
+
+--------------------------------------------------
+Ensembl
+--------------------------------------------------
+
+accuracy
+Ensembl accuracy score: 0.961
+
+average precision score
+Ensembl average precision score score: 0.822
+
+recall score
+Ensembl recall score score: 0.870
+
+f1 score
+Ensembl f1 score score: 0.893
+
