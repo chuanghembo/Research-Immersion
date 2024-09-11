@@ -1,0 +1,58 @@
+'''
+
+Plot cumlative explained variance and explained variance of PCA components
+
+'''
+
+# %% 
+## Load in libraries
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+import joblib
+import argparse
+
+# %%
+# Get input arguments
+
+parser = argparse.ArgumentParser(description='Plot PCA components')
+parser.add_argument('--model', type=str, help='Input PCA model file')
+parser.add_argument('--out', type=str, default='pca_components.png', help='Output file for the plot')
+
+args = parser.parse_args()
+
+model_file = args.model
+out_file = args.out
+
+# %%
+# Load PCA model
+
+pca = joblib.load(model_file)
+
+# %%
+# Plot explained variance and cumulative explained variance 
+
+cumulative_variance = np.cumsum(pca.explained_variance_ratio_)
+index_95 = np.argmax(cumulative_variance >= 0.95)
+index_99 = np.argmax(cumulative_variance >= 0.999)
+
+fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+
+# Plot cumulative explained variance with x-axis starting from 1
+ax[0].plot(np.arange(1, len(cumulative_variance) + 1), cumulative_variance, '-*')
+ax[0].axvline(index_95 + 1, color='r', linestyle='--')  # Adjust for 1-based index
+ax[0].axvline(index_99 + 1, color='r', linestyle='--')  # Adjust for 1-based index
+ax[0].set_xlabel('Number of components')
+ax[0].set_ylabel('Cumulative explained variance')
+ax[0].set_title('Cumulative explained variance')
+
+# Plot explained variance with x-axis starting from 1
+ax[1].plot(np.arange(1, len(pca.explained_variance_ratio_) + 1), pca.explained_variance_ratio_, '-*')
+ax[1].set_xlabel('Number of components')
+ax[1].set_ylabel('Explained variance')
+ax[1].set_title('Explained variance')
+
+plt.savefig(out_file)
+print(f'95% explained variance: {index_95 + 1} components and 99.9% explained variance: {index_99 + 1} components')
+plt.show()
